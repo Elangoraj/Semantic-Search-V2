@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <form id="searchForm" action="/search" method="post" class="mb-8 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="query">
+                Search Query
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="query" type="text" name="query" placeholder="Enter your search query" value="{{ query if query else '' }}">
+        </div>
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="num_results">
+                Number of Results
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="num_results" type="number" name="num_results" min="1" max="20" value="{{ num_results if num_results else 5 }}">
+        </div>
+        <div class="flex items-center justify-between">
+            <button id="searchButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                Search
+            </button>
+        </div>
+    </form>
+
+    <div id="loadingIndicator" class="hidden text-center">
+        <p class="text-gray-600">Searching...</p>
+    </div>
+
+    <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <span class="block sm:inline"></span>
+    </div>
+
+    <div id="resultsContainer"></div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const form = document.getElementById('searchForm');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+        const searchButton = document.getElementById('searchButton');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            // Show loading indicator and hide error message
+            loadingIndicator.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            resultsContainer.innerHTML = '';
+            searchButton.disabled = true;
+
+            fetch('/search', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                let resultsHtml = `<h2 class="text-2xl font-bold mb-4">Search Results for "${data.query}"</h2>`;
+                data.results.forEach(result => {
+                    resultsHtml += `
+                        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                            <h3 class="text-xl font-bold">${result.movie_name} (${result.release_year})</h3>
+                            <p class="text-sm text-gray-600">Genres: ${result.genres}</p>
+                            <p class="text-sm text-gray-600 mt-1">Similarity Score: ${result.score.toFixed(2)}</p>
+                            <p class="mt-2">${result.summary}</p>
+                        </div>
+                    `;
+                });
+                resultsContainer.innerHTML = resultsHtml;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorMessage.querySelector('span').textContent = error.message;
+                errorMessage.classList.remove('hidden');
+            })
+            .finally(() => {
+                loadingIndicator.classList.add('hidden');
+                searchButton.disabled = false;
+            });
+        });
+    });
+</script>
+{% endblock %}
