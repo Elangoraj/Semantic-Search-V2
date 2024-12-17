@@ -38,9 +38,9 @@ This Movie Search App is a semantic search engine for movies. It uses natural la
    docker run -p 6333:6333 qdrant/qdrant
    ```
 
-5. Process and upload the movie data to Qdrant (you may need to modify the data processing script):
+5. Need to ensure the dataset is downloaded and put in the path (data/MovieSummaries/*) as shown below. Now we can run the process and upload script below to upload the movies to Qdrant database(you may need to modify the data processing script):
    ```
-   python process_and_upload_data.py
+   python -m app.process-and-upload-data
    ```
 
 ## Usage
