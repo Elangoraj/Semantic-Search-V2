@@ -3,6 +3,7 @@ from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient, models
 import ast
 import logging
+from tqdm import tqdm
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def process_data(movies_path, plots_path):
 
     return df
 
-def create_and_upload_to_qdrant(df, client, collection_name="movies", encoder_model="all-MiniLM-L6-v2", batch_size=100):
+def create_and_upload_to_qdrant(df, client, collection_name="movies_summary", encoder_model="all-MiniLM-L6-v2", batch_size=500):
     logger.info("Initializing SentenceTransformer...")
     encoder = SentenceTransformer(encoder_model)
     
@@ -64,7 +65,7 @@ def create_and_upload_to_qdrant(df, client, collection_name="movies", encoder_mo
     input_data = df[['movie_name', 'release_year', 'genres', 'language', 'country', 'text']].to_dict(orient='records')
     
     total_batches = (len(input_data) - 1) // batch_size + 1
-    for i in range(0, len(input_data), batch_size):
+    for i in tqdm(range(0, len(input_data), batch_size)):
         batch = input_data[i:i+batch_size]
         
         logger.info(f"Processing batch {i//batch_size + 1}/{total_batches}")

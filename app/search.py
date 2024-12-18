@@ -16,14 +16,6 @@ def initialize_qdrant_client():
     try:
         logger.debug("Initializing Qdrant client")
         client = QdrantClient(host="localhost", port=6333)
-        collections = client.get_collections()
-        logger.debug(f"Available collections: {collections}")
-        if "movies" not in [c.name for c in collections.collections]:
-            logger.info("Creating 'movies' collection")
-            client.create_collection(
-                collection_name="movies",
-                vectors_config=VectorParams(size=encoder.get_sentence_embedding_dimension(), distance=Distance.COSINE),
-            )
         logger.info("Qdrant client initialized successfully")
         return client
     except Exception as e:
@@ -41,7 +33,7 @@ def semantic_search(query, client, top_k=5):
     try:
         logger.debug(f"Performing search with top_k={top_k}")
         results = client.search(
-            collection_name="movies",
+            collection_name="movies_summary",
             query_vector=query_vector,
             limit=top_k
         )
