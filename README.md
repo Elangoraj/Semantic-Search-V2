@@ -3,6 +3,10 @@
 ## Description
 This Movie Search App is a semantic search engine for movies. It uses natural language processing to find movies based on plot summaries, genres, and other metadata. The app leverages FastAPI for the backend, Qdrant for vector search, and Sentence Transformers for generating embeddings.
 
+## App
+
+![App](images/movie_search.gif)
+
 ## Features
 - Semantic search for movies based on plot summaries and metadata
 - Customizable number of search results
